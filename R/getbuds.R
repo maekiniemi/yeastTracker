@@ -1,4 +1,17 @@
-#PLUTT#function for computing the area of a polygon
+
+#' Compute area of a polygon
+#'
+#' This  function computes the area of polygon x.
+#' It returns a list object with principal component 1 and principal component 2  as well as their intersection.
+#' @param contour an ROI object from read.ijzip().
+#' @param plot a boolean value specifying whether to plot the ROI including PC1 and PC2.
+#' @return Returns one matrix for each principal component where the first row represents x,y coordinates for the end of the vector with lowest x value. The second row represents x,y coordinates for the end of the PC2 vector with highest x value. It also returns a matrix with the x,y coordinates for where PC1 and PC2 intersect, which represents the centroid of the polygon.
+#' @export
+#' @examples
+#' filename<-system.file('data/YET629_02_w1L488nm-L561nm_sequence-10000.zip', package='yeast')
+#' roi <- read.ijzip(filename)
+#' PCAresult<-getPrincipalAxes(roi$`001_005`$coords, plot=T)
+
 area<-function(X){
   X<-cbind(X$X, X$Y)
   X<-rbind(X,X[1,])
@@ -135,7 +148,7 @@ getIntersection<-function(a, b){
 
 #' getPrincipalAxes
 #'
-#' This function loads the contour of a cell and performs a principal component analysis.
+#' This bajs function loads the contour of a cell and performs a principal component analysis.
 #' It returns a list object with principal component 1 and principal component 2  as well as their intersection.
 #' @param contour an ROI object from read.ijzip().
 #' @param plot a boolean value specifying whether to plot the ROI including PC1 and PC2.
@@ -200,6 +213,7 @@ edist<-function(coord){
 #' filename<-system.file('data/YET629_02_w1L488nm-L561nm_sequence-10000.zip', package='yeast')
 #' roi <- read.ijzip(filename)
 #' yeastCells<-get.buds(roi)
+
 get.buds<-function(x, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA, add=FALSE, xlab = "", ylab = "", main = "get buds", asp = 1, ...) {
 
   ## Base plot
