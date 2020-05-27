@@ -18,11 +18,23 @@ get.buds(
 )
 }
 \arguments{
-\item{x}{an ROI object from read.ijzip().}
+\item{x}{.roi object from read.ijzip().}
 
 \item{THRESHOLD}{an integer value specifying the area in pixels needed for an overlap to count as mother/budded relation. Default value is 100.}
 
 \item{borderCol}{color value for overlap boundary.}
+
+\item{add}{plot in the same coordinate system. default FALSE}
+
+\item{xlab}{x axis label. Default empty.}
+
+\item{ylab}{y axis label. Default empty.}
+
+\item{main}{header. Default "get buds"}
+
+\item{asp}{set the aspect ratio of the plot. Default 1.}
+
+\item{fillcol}{color value for overlap filling}
 }
 \value{
 

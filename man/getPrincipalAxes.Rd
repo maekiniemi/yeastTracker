@@ -7,16 +7,16 @@
 getPrincipalAxes(contour, plot = F)
 }
 \arguments{
-\item{contour}{an ROI object from read.ijzip().}
+\item{contour}{two dimensional array where the first column constist of x values and the second column constist of y values.}
 
-\item{plot}{a boolean value specifying whether to plot the ROI including PC1 and PC2.}
+\item{plot}{a boolean value specifying whether to plot the ROI including PC1 and PC2. Defauls value is FALSE.}
 }
 \value{
-Returns one matrix for each principal component where the first row represents x,y coordinates for the end of the vector with lowest x value. The second row represents x,y coordinates for the end of the PC2 vector with highest x value. It also returns a matrix with the x,y coordinates for where PC1 and PC2 intersect, which represents the centroid of the polygon.
+Returns one matrix for each principal component where the first row represents x,y coordinates for the end of the vector with lowest x value. The second row represents x,y coordinates for the end of the PC2 vector with highest x value. It also returns a matrix with the x,y coordinates for hte PC1 and PC2 intersection, which represents the centroid of the polygon.
 }
 \description{
-This bajs function loads the contour of a cell and performs a principal component analysis.
-It returns a list object with principal component 1 and principal component 2  as well as their intersection.
+This function loads the contour of an object and performs a principal component analysis on it.
+It returns a list object with principal component 1 and principal component 2  as well as their intersection coordinates.
 }
 \examples{
 filename<-system.file('data/YET629_02_w1L488nm-L561nm_sequence-10000.zip', package='yeast')

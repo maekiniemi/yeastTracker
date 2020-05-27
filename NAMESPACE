@@ -3,4 +3,5 @@
 export(area)
 export(cluster.cells)
 export(get.buds)
+export(getIntersection)
 export(getPrincipalAxes)
