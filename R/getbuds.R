@@ -241,7 +241,7 @@ get.buds<-function(x, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA,
 
   ## Base plot
   if (!add) {
-    par(mfrow=c(1,2))
+    par(mfrow=c(1,3))
     plot(NA, NA, xlim=range(unlist(lapply(x, function(i) i$xrange)), na.rm = TRUE), ylim= rev(range(unlist(lapply(x, function(i) i$yrange)), na.rm = TRUE)) , axes = FALSE, xlab = xlab, ylab = ylab, main = main, asp = asp)
   }
 
@@ -316,7 +316,7 @@ get.buds<-function(x, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA,
         if( area(overlap) > THRESHOLD ){
           polygon(overlap$X, overlap$Y, col='#FF000020', border='red', lwd=2)
           if( abs(area(p1)) >  abs(area(p2)) ){
-            #found mother cell
+            #find mother cell
             #merge into larger polygon
             p1 <- data.frame(X = p1$X, Y = p1$Y, id = 1)#[-which(paste(p1$X, p1$Y) %in% paste(overlap$X, overlap$Y))]
             p2 <- data.frame(X = p2$X, Y = p2$Y, id = 2)#[-which(paste(p2$X, p2$Y) %in% paste(overlap$X, overlap$Y))]
@@ -353,24 +353,35 @@ get.buds<-function(x, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA,
 
             cellShape[[i]] <- buddingunion
 
+# rotate around PCA. 
+            
             PC<-getPrincipalAxes(buddingunion[,1:2], plot = T)
             angle <-   atan( PC$PC1[2,1]/PC$PC1[2,2] )
             M <- matrix( c(cos(angle), -sin(angle), sin(angle), cos(angle)), 2, 2 )
             buddingunion[,1:2] <- as.matrix(buddingunion[,1:2], ncol=2) %*% M
+            
 
 
+# calculate the new centroid
             centroid <- apply(buddingunion[buddingunion$id==1,1:2], 2, mean)
             normalizedPos <- sweep(buddingunion[,1:2], 2, centroid )
             names(normalizedPos) <- c('X1', 'Y1')
+            
+            #if bud is negative on Y then reflect Y values so bud always faces up
+            centroidBud<-apply(normalizedPos[buddingunion$id==2, ], 2, mean)
+            if(centroidBud[2] < 0)
+              normalizedPos$Y1 <- (-normalizedPos$Y1)
+            
             cellShape[[i]] <- cbind(cellShape[[i]], normalizedPos)
             cellShape[[i]]$roi <- i
 
-
+            plot(cellShape[[i]]$X1, cellShape[[i]]$Y1, asp=1, type='l', ylab='', xlab='', axes=F)
+            polygon(cellShape[[i]]$X1, cellShape[[i]]$Y1)
 
             print(paste("Polygon", i, "is mother to", q))
           }else{
             cellShape[[i]] <- NA
-            print(paste("Polygon", q, "is mother to", i))
+            print(paste("Polygon", q, "is mother to polygon", i))
           }
 
         }
