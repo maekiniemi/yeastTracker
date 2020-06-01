@@ -12,6 +12,7 @@
 #' roi <- read.ijzip(filename)
 #' yeastCells<-get.buds(roi)
 #' cluster.cells(yeastCells)
+
 cluster.cells<-function(yeastCells, K = 3){
   dimred<-1:200
 

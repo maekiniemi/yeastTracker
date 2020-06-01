@@ -241,7 +241,7 @@ get.buds<-function(x, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA,
 
   ## Base plot
   if (!add) {
-    par(mfrow=c(1,3))
+    par(mfrow=c(1,4))
     plot(NA, NA, xlim=range(unlist(lapply(x, function(i) i$xrange)), na.rm = TRUE), ylim= rev(range(unlist(lapply(x, function(i) i$yrange)), na.rm = TRUE)) , axes = FALSE, xlab = xlab, ylab = ylab, main = main, asp = asp)
   }
 
@@ -336,8 +336,8 @@ get.buds<-function(x, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA,
             indMax<-which.max(distanceBetweenE1)
             indMin<-which.min(distanceBetweenE1)
 
-            plot(buddingunion[,1:2], type='p')
-            text(buddingunion[,1], buddingunion[,2], 1:nrow(buddingunion))
+            #plot(buddingunion[,1:2], type='p')
+            #text(buddingunion[,1], buddingunion[,2], 1:nrow(buddingunion))
 
             index1 <- c(e1[1]:1, sum(buddingunion$id == 1):e1[2] )
             index2<-c(e2[indMax]:min(which(buddingunion$id == 2)), nrow(buddingunion):e2[indMin]  )
