@@ -7,20 +7,20 @@
 #' @return a list object of rois with corrected IDs adjusted to previous time stack, if needed.
 #' @export
 #' @examples
-#' folder<-'E:/BudFinder/STARDIST/cell_outline_train/Cells_2D/results/results'
+#' folder<-system.file('data/my.zipfiles', package='yeast')
 #' yeastMovie<-trackCell(folder)
 
-trackCell <- function(folder){
+trackCell <- function(folder, ...){
   zipfiles<-dir(folder, full.names = T)
   zipfiles<-zipfiles[which(tools::file_ext(zipfiles) == 'zip')]
   timesSeries<-list()
   roi <- read.ijzip(zipfiles[1])
-  timesSeries[[1]]<-get.buds(roi)
+  timesSeries[[1]]<-get.buds(roi, ...)
   for(i in seq_along(zipfiles)[-1]){
     roi <- read.ijzip(zipfiles[i])
     
     
-    cellShape.tmp<-get.buds(roi)
+    cellShape.tmp<-get.buds(roi, ...)
     
 
     centroid<-lapply(seq_along(cellShape.tmp), function(x){

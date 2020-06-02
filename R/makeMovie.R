@@ -10,7 +10,6 @@
 #' folder<-'E:/BudFinder/STARDIST/cell_outline_train/Cells_2D/results/results'
 #' yeastMovie<-trackCell(folder)
 
-install.FFmpeg()
 
 makeMovie <- function(timesSeries){
   

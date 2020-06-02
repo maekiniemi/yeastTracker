@@ -6,7 +6,7 @@
 \usage{
 get.buds(
   x,
-  THRESHOLD = 100,
+  THRESHOLD = 80,
   borderCol = rgb(0, 0, 0, 0.2),
   fillCol = NA,
   add = FALSE,

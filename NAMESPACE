@@ -2,6 +2,9 @@
 
 export(area)
 export(cluster.cells)
+export(edist)
 export(get.buds)
 export(getIntersection)
 export(getPrincipalAxes)
+export(makeMovie)
+export(trackCell)
