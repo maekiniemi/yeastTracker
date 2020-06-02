@@ -1,4 +1,25 @@
-#PLUTT#function for computing the area of a polygon
+#' Compute area of a polygon
+#'
+#' This  function computes the area of a polygon X.
+#' 
+#' @param X a polygon dataframe of x and y coordinates
+#' @return area of the polygon x.
+#' @export
+#' @examples
+#' filename<-system.file('data/YET629_02_w1L488nm-L561nm_sequence-10000.zip', package='yeast')
+#' roi <- read.ijzip(filename)
+#' 
+#' cordi <- roi$`001_001`$coords
+#' X <-  data.frame(X=cordi[,1], Y=cordi[,2])
+#' area<-function(X){
+#'  X<-cbind(X$X, X$Y)
+#'  X<-rbind(X,X[1,])
+#'  x<-X[,1]; y<-X[,2]; lx<-length(x)
+#'  -sum((x[2:lx]-x[1:lx-1])*(y[2:lx]+y[1:lx-1]))/2
+#' }
+#' 
+#' area(X)
+
 area<-function(X){
   X<-cbind(X$X, X$Y)
   X<-rbind(X,X[1,])
@@ -7,7 +28,16 @@ area<-function(X){
 }
 
 
-#function for finding the intersection between two polygons
+#' Find intersection of two objects
+#'
+#' This  function identifies the positions of intersection of two matrix objects.
+#' 
+#' @param a first matrix object
+#' @param b second matrix object
+#' @return the coordinates of intersection
+#' @export
+
+
 getIntersection<-function(a, b){
   # the intersection [(x1,y1), (x2, y2)]
   #   it might be a line or a single point. If it is a point,
@@ -135,11 +165,11 @@ getIntersection<-function(a, b){
 
 #' getPrincipalAxes
 #'
-#' This function loads the contour of a cell and performs a principal component analysis.
-#' It returns a list object with principal component 1 and principal component 2  as well as their intersection.
-#' @param contour an ROI object from read.ijzip().
-#' @param plot a boolean value specifying whether to plot the ROI including PC1 and PC2.
-#' @return Returns one matrix for each principal component where the first row represents x,y coordinates for the end of the vector with lowest x value. The second row represents x,y coordinates for the end of the PC2 vector with highest x value. It also returns a matrix with the x,y coordinates for where PC1 and PC2 intersect, which represents the centroid of the polygon.
+#' This function loads the contour of an object and performs a principal component analysis on it.
+#' It returns a list object with principal component 1 and principal component 2  as well as their intersection coordinates.
+#' @param contour two dimensional array where the first column constist of x values and the second column constist of y values.
+#' @param plot a boolean value specifying whether to plot the ROI including PC1 and PC2. Defauls value is FALSE.
+#' @return Returns one matrix for each principal component where the first row represents x,y coordinates for the end of the vector with lowest x value. The second row represents x,y coordinates for the end of the PC2 vector with highest x value. It also returns a matrix with the x,y coordinates for hte PC1 and PC2 intersection, which represents the centroid of the polygon.
 #' @export
 #' @examples
 #' filename<-system.file('data/YET629_02_w1L488nm-L561nm_sequence-10000.zip', package='yeast')
@@ -190,33 +220,55 @@ edist<-function(coord){
 #' Import and normalize ImageJ ROIs to cell coordinates
 #'
 #' This function loads ImageJ roi zip files.
-#'It returns a list object with rois normalized into coordinate system as well as mother/bud relations.
-#' @param x an ROI object from read.ijzip().
+#' It returns a list object with rois normalized into coordinate system as well as mother/bud relations.
+#' @param x .roi object from read.ijzip().
 #' @param THRESHOLD an integer value specifying the area in pixels needed for an overlap to count as mother/budded relation. Default value is 100.
 #' @param borderCol color value for overlap boundary.
+#' @param fillcol color value for overlap filling
+#' @param add plot in the same coordinate system. default FALSE
+#' @param xlab x axis label. Default empty.
+#' @param ylab y axis label. Default empty.
+#' @param main header. Default "get buds"
+#' @param asp set the aspect ratio of the plot. Default 1. 
 #' @return
 #' @export
 #' @examples
 #' filename<-system.file('data/YET629_02_w1L488nm-L561nm_sequence-10000.zip', package='yeast')
 #' roi <- read.ijzip(filename)
 #' yeastCells<-get.buds(roi)
+
 get.buds<-function(x, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA, add=FALSE, xlab = "", ylab = "", main = "get buds", asp = 1, ...) {
 
   ## Base plot
   if (!add) {
-    par(mfrow=c(1,2))
+    par(mfrow=c(1,4))
     plot(NA, NA, xlim=range(unlist(lapply(x, function(i) i$xrange)), na.rm = TRUE), ylim= rev(range(unlist(lapply(x, function(i) i$yrange)), na.rm = TRUE)) , axes = FALSE, xlab = xlab, ylab = ylab, main = main, asp = asp)
   }
 
 
-
+#calculates the mean of each column (the Y positions) of an roi and assign the value to the centroid object. 
+# so it basically calculates the centroid of the polygon
   lapply(x, function(i) {tmp <- i
   class(tmp) <- "ijroi"
   plot(tmp, add = TRUE, ...)
-  centroid<-apply(tmp$coords, 2, mean)
+  centroid<-apply(tmp$coord, 2, mean)
   text(centroid[1], centroid[2], labels = tmp$name, cex=0.5)
   })
 
+#goes through all rois and adds the coordinates to a list named p.
+#creates an object named cellshape that creates a dataframe of the first and second column of p and assign
+#them as X and Y, respectively. These are the X and Y coordinates for the cell outlines.
+#it also gives them and id, 1. 
+#To identify the position of the centroid of the cells, we then take the X and Y coordinates of the cellshape 
+#data frame columns and calculates the mean value. The output is the x and y coordinates of the centroid for
+#each cell. 
+# To normalize the centroid positions we then take the x and y column coordinates and subtract the centroid value.This
+# is to get the cells centered in the same coordinate system. 
+# The nomalized values are named X1 and Y1.
+# Then a new object called cellshape is created where we combine the columns of cellshape and normalizespos into one
+# single dataframe. 
+# Then we add another column to the data frame which gives each cell a unique number based on the roi. 
+  
   allPolygons <- seq_along(roi)
   cellShape <- list()
   for(i in seq_along(roi)){
@@ -230,7 +282,17 @@ get.buds<-function(x, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA,
     names(normalizedPos) <- c('X1', 'Y1')
     cellShape[[i]] <- cbind(cellShape[[i]], normalizedPos)
     cellShape[[i]]$roi <- i
+    #double brackets subsets a list
 
+    
+# q.overlap contains a repeat of 0 for the length of allpolygons, which is 11.
+# the for loop then iterates over allpolygons except the current one [-i] and assigns the coordinates to qi. 
+# Then it checks what coordinates in qi that overlaps with p.
+# Then it will check further if the q.overlap is larger than 0 coordinate points. 
+# This is done by taking all the coordinates that passes this requirement and assign them to qi. 
+# Then two polygon data frames are created from the coordinates in p and qi respectively.
+# PID and POS are from package PBS mapping and assigns the polygon an ID and position. 
+    
     q.overlap <- rep(0, length(allPolygons))
     for(q in allPolygons[-i]){
       qi <- roi[[q]]$coords
@@ -238,19 +300,23 @@ get.buds<-function(x, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA,
     }
     check.further<- which(q.overlap > 0)
     if(length(check.further)>0){
-      #check if area overlap is larger than THRESHOLD
       for(q in check.further){
         qi <- roi[[q]]$coords
 
-
-        p1 <- data.frame(PID=rep(1, nrow(p)), POS=1:nrow(p), X=p[,1], Y=p[,2])
+        p1 <- data.frame(PID=rep(1, nrow(p)), POS=1:nrow(p), X=p[,1], Y=p[,2]) 
         p2 <- data.frame(PID=rep(2, nrow(qi)), POS=1:nrow(qi), X=qi[,1], Y=qi[,2])
 
+# Then the polygons are joined and assigned to overlap. If the area of the overlap is larger than the set threshold, 
+# default > 100, a new polygon is created from the overlapping coordinates with pink filing and red border.
+# Then it checks the absolute value of the x and y coordinates of the p1 and p2 polygons. The largest one will be 
+# assigned as the mother and the smaller as bud. Then the two cells are combines to one single polygon and plots the 
+# cell, including the overlap polygon. 
+        
         overlap <- PBSmapping::joinPolys(p1, p2)
         if( area(overlap) > THRESHOLD ){
           polygon(overlap$X, overlap$Y, col='#FF000020', border='red', lwd=2)
           if( abs(area(p1)) >  abs(area(p2)) ){
-            #found mother cell
+            #find mother cell
             #merge into larger polygon
             p1 <- data.frame(X = p1$X, Y = p1$Y, id = 1)#[-which(paste(p1$X, p1$Y) %in% paste(overlap$X, overlap$Y))]
             p2 <- data.frame(X = p2$X, Y = p2$Y, id = 2)#[-which(paste(p2$X, p2$Y) %in% paste(overlap$X, overlap$Y))]
@@ -258,6 +324,7 @@ get.buds<-function(x, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA,
             buddingunion<-rbind(p1, p2)
             buddingunion<-buddingunion[-which(paste(buddingunion$X, buddingunion$Y) %in% paste(overlap$X, overlap$Y)),]
             polygon( buddingunion)
+            
 
             e1<-which.max( edist( buddingunion[buddingunion$id==1,] ) )
             e2<-which.max( edist( buddingunion[buddingunion$id==2,] ) ) + sum(buddingunion$id==1)
@@ -269,8 +336,8 @@ get.buds<-function(x, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA,
             indMax<-which.max(distanceBetweenE1)
             indMin<-which.min(distanceBetweenE1)
 
-            plot(buddingunion[,1:2], type='p')
-            text(buddingunion[,1], buddingunion[,2], 1:nrow(buddingunion))
+            #plot(buddingunion[,1:2], type='p')
+            #text(buddingunion[,1], buddingunion[,2], 1:nrow(buddingunion))
 
             index1 <- c(e1[1]:1, sum(buddingunion$id == 1):e1[2] )
             index2<-c(e2[indMax]:min(which(buddingunion$id == 2)), nrow(buddingunion):e2[indMin]  )
@@ -286,24 +353,35 @@ get.buds<-function(x, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA,
 
             cellShape[[i]] <- buddingunion
 
+# rotate around PCA. 
+            
             PC<-getPrincipalAxes(buddingunion[,1:2], plot = T)
             angle <-   atan( PC$PC1[2,1]/PC$PC1[2,2] )
             M <- matrix( c(cos(angle), -sin(angle), sin(angle), cos(angle)), 2, 2 )
             buddingunion[,1:2] <- as.matrix(buddingunion[,1:2], ncol=2) %*% M
+            
 
 
+# calculate the new centroid
             centroid <- apply(buddingunion[buddingunion$id==1,1:2], 2, mean)
             normalizedPos <- sweep(buddingunion[,1:2], 2, centroid )
             names(normalizedPos) <- c('X1', 'Y1')
+            
+            #if bud is negative on Y then reflect Y values so bud always faces up
+            centroidBud<-apply(normalizedPos[buddingunion$id==2, ], 2, mean)
+            if(centroidBud[2] < 0)
+              normalizedPos$Y1 <- (-normalizedPos$Y1)
+            
             cellShape[[i]] <- cbind(cellShape[[i]], normalizedPos)
             cellShape[[i]]$roi <- i
 
-
+            plot(cellShape[[i]]$X1, cellShape[[i]]$Y1, asp=1, type='l', ylab='', xlab='', axes=F)
+            polygon(cellShape[[i]]$X1, cellShape[[i]]$Y1)
 
             print(paste("Polygon", i, "is mother to", q))
           }else{
             cellShape[[i]] <- NA
-            print(paste("Polygon", q, "is mother to", i))
+            print(paste("Polygon", q, "is mother to polygon", i))
           }
 
         }
