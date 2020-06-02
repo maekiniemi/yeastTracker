@@ -1,4 +1,4 @@
-#' Imports ImageJ ROIs and control cell ID
+#' Makes movie out of single cell time stacks
 #'
 #' This function loads ImageJ roi zip files.
 #' It returns a list object with corrected cell IDs if needed.
@@ -10,5 +10,9 @@
 #' folder<-'E:/BudFinder/STARDIST/cell_outline_train/Cells_2D/results/results'
 #' yeastMovie<-trackCell(folder)
 
+install.FFmpeg()
 
-makeMovie <- function(timesSeries)
+makeMovie <- function(timesSeries){
+  
+  
+}
