@@ -7,7 +7,7 @@
 #' @return a list object of rois with corrected IDs adjusted to previous time stack, if needed.
 #' @export
 #' @examples
-#' folder<-'E:/BudFinder/STARDIST/cell_outline_train/Cells_2D/results/results'
+#' folder<-system.file('data/my.zipfiles', package='yeast')
 #' yeastMovie<-trackCell(folder)
 
 

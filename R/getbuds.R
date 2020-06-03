@@ -248,7 +248,7 @@ edist<-function(coord){
 #' roi <- read.ijzip(filename)
 #' yeastCells<-get.buds(roi)
 
-get.buds<-function(x, THRESHOLD = 80, borderCol = rgb(0,0,0,0.2), fillCol = NA, add=FALSE, xlab = "", ylab = "", main = "get buds", asp = 1, ...) {
+get.buds<-function(x, THRESHOLD = 50, borderCol = rgb(0,0,0,0.2), fillCol = NA, add=FALSE, xlab = "", ylab = "", main = "get buds", asp = 1, ...) {
 
   ## Base plot
   if (!add) {
