@@ -244,11 +244,11 @@ edist<-function(coord){
 #' @return
 #' @export
 #' @examples
-#' filename<-system.file('data/YET629_02_w1L488nm-L561nm_sequence-10000.zip', package='yeast')
+#' filename<-system.file('data/YET629_02_w1L488nm-L561nm_sequence-10476.zip', package='yeast')
 #' roi <- read.ijzip(filename)
 #' yeastCells<-get.buds(roi)
 
-get.buds<-function(x, THRESHOLD = 50, borderCol = rgb(0,0,0,0.2), fillCol = NA, add=FALSE, xlab = "", ylab = "", main = "get buds", asp = 1, ...) {
+get.buds<-function(x, THRESHOLD = 200, borderCol = rgb(0,0,0,0.2), fillCol = NA, add=FALSE, xlab = "", ylab = "", main = "get buds", asp = 1, ...) {
 
   ## Base plot
   if (!add) {
