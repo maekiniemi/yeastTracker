@@ -7,22 +7,23 @@
 #' @return a list object of rois with corrected IDs adjusted to previous time stack, if needed.
 #' @export
 #' @examples
-#' folder<-system.file('data/my.zipfiles', package='yeast')
+#' folder<-system.file('data', package='yeast')
 #' yeastMovie<-trackCell(folder)
 
-trackCell <- function(folder, ...){
+#reads in all roi folders and combine them to one object
+trackCell <- function(folder){
   zipfiles<-dir(folder, full.names = T)
   zipfiles<-zipfiles[which(tools::file_ext(zipfiles) == 'zip')]
   timesSeries<-list()
-  roi <- read.ijzip(zipfiles[1])
-  timesSeries[[1]]<-get.buds(roi, ...)
+  roi <- RImageJROI::read.ijzip(zipfiles[1])
+  timesSeries[[1]]<-get.buds(roi)
   for(i in seq_along(zipfiles)[-1]){
-    roi <- read.ijzip(zipfiles[i])
+    roi <- RImageJROI::read.ijzip(zipfiles[i])
     
+#saves the rois into a list object
+    cellShape.tmp<-get.buds(roi)
     
-    cellShape.tmp<-get.buds(roi, ...)
-    
-
+#identifies the centroid of each cell
     centroid<-lapply(seq_along(cellShape.tmp), function(x){
       if(length(cellShape.tmp[[x]])>1){
         apply(cellShape.tmp[[x]][,1:2], 2, mean)
@@ -31,7 +32,7 @@ trackCell <- function(folder, ...){
       }
     })
     
-    
+ #checks if the cell centroid with a specific ID is within the polygon of the previous time stack, then they will be assigned 1. If not they are assigned 0.
     position.correct <- lapply(seq_along(timesSeries[[i-1]]), function(x){
       if(length(timesSeries[[i-1]][[x]])>1){
         point.in.polygon(centroid[[x]][1], centroid[[x]][2], timesSeries[[i-1]][[x]]$X,  timesSeries[[i-1]][[x]]$Y)
@@ -39,7 +40,9 @@ trackCell <- function(folder, ...){
         return(NA)
       }
     })
-    
+
+# takes the cells thar were identified as not correct
+# if there are cells that need to change ID it will compute the original centroid of them 
     has.to.change<-which(position.correct == 0)
     timesSeries[[i]] <- cellShape.tmp
     if(length(has.to.change)>0){
@@ -51,7 +54,8 @@ trackCell <- function(folder, ...){
           return(NA)
         }
       })
-      
+
+# Checks if the original centroid of the cells is found withing the cells of the previous time stack            
       order.change<-integer()
       for(k in seq_along(centroid.original)){
       match.cell <- lapply(seq_along(cellShape.tmp), function(x){
@@ -61,7 +65,9 @@ trackCell <- function(folder, ...){
           return(NA)
         }
       })
-    
+
+      
+# Changes the ID of cells that have the wrong ID   
       order.change <- c(order.change, which(unlist(match.cell) == 1) )
       }
     

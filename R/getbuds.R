@@ -244,22 +244,25 @@ edist<-function(coord){
 #' @return
 #' @export
 #' @examples
-#' filename<-system.file('data/YET629_02_w1L488nm-L561nm_sequence-10000.zip', package='yeast')
+#' filename<-system.file('data/YET629_02_w1L488nm-L561nm_sequence-10324.zip', package='yeast')
 #' roi <- read.ijzip(filename)
 #' yeastCells<-get.buds(roi)
 
-get.buds<-function(x, THRESHOLD = 80, borderCol = rgb(0,0,0,0.2), fillCol = NA, add=FALSE, xlab = "", ylab = "", main = "get buds", asp = 1, ...) {
+# Problem: 100 threshold is perfect for the first two images but too low for third image. If we increase
+# threshold to fit the third image it will be to large for image 2...
+
+get.buds<-function(roi, THRESHOLD = 100, borderCol = rgb(0,0,0,0.2), fillCol = NA, add=FALSE, xlab = "", ylab = "", main = "get buds", asp = 1, ...) {
 
   ## Base plot
   if (!add) {
     par(mfrow=c(1,4))
-    plot(NA, NA, xlim=range(unlist(lapply(x, function(i) i$xrange)), na.rm = TRUE), ylim= rev(range(unlist(lapply(x, function(i) i$yrange)), na.rm = TRUE)) , axes = FALSE, xlab = xlab, ylab = ylab, main = main, asp = asp)
+    plot(NA, NA, xlim=range(unlist(lapply(roi, function(i) i$xrange)), na.rm = TRUE), ylim= rev(range(unlist(lapply(roi, function(i) i$yrange)), na.rm = TRUE)) , axes = FALSE, xlab = xlab, ylab = ylab, main = main, asp = asp)
   }
 
 
 #calculates the mean of each column (the Y positions) of an roi and assign the value to the centroid object. 
 # so it basically calculates the centroid of the polygon
-  lapply(x, function(i) {tmp <- i
+  lapply(roi, function(i) {tmp <- i
   class(tmp) <- "ijroi"
   plot(tmp, add = TRUE, ...)
   centroid<-apply(tmp$coord, 2, mean)
