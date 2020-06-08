@@ -2,47 +2,47 @@
 #'
 #' This function loads ImageJ roi zip files.
 #' It returns a list object with corrected cell IDs if needed.
-#' @param timesSeries 
+#' @param folders zip folders containing imageJ rois of yeast cells 
+#' @param cll id of cell of interest
 #' @return a list object of rois with corrected IDs adjusted to previous time stack, if needed.
 #' @export
 #' @examples
-#' folder<-system.file('data/my.zipfiles', package='yeast')
+#' folders<-system.file('data/my.zipfiles', package='yeast')
 #' yeastMovie<-trackCell(folder)
+#' makeMovie(yeastMovie, cll = 7)
 
 #use the example file daniel made "Untitled1". Use the way we plot in the clustering function to save
 # as png files. Then use ffmpeg on that folder. 
+#ta celler av intresse
+#och identifiera på roi ID 
+#spara varje polygon plot som png enligt Daniels exempel
+#använd ffmpeg enligt daniels exempel
 
-makeMovie <- function(timesSeries){
+makeMovie <- function(timesSeries, cll=6){
   
   newfolder<-'mymovie'
+  olddir<-getwd()
   dir.create(newfolder)
   setwd(newfolder)
   
-  for (i in (timesSeries[[i]])){
-    
-xycoord<-list()
+for (r in seq_along(timesSeries)){
+  x.p <- list()
+  y.p <- list()
+  x.p <- timesSeries[[r]][[cll]][,4]
+  y.p <- timesSeries[[r]][[cll]][,5]
+  filename<-paste0('pic', formatC(r, digits = 3, flag='0'), '.png')
+  png(filename = filename, width=1920, height=1080)
+  plot(x.p, y.p, type = "n", asp=1, axes=F, xlab='', ylab='')
+  polygon(x.p, y.p)
+  dev.off()
 
-    
-    xAvg<-numeric()
-    yAvg<-numeric()
-    for(l in which(clusters == k)){
-      x <- dimred[l,1:100]
-      y <- dimred[l,101:200]
-      polygon(x , y, border=rgb(0,0,0, 0.1) )
-      xAvg<-cbind(xAvg, x)
-      yAvg<-cbind(yAvg, y)
-    }
-    
-  }
-  
-  for(q in 1:nrow(data)){
-    filename<-paste0('pic', formatC(q, digits = 3, flag='0'), '.png')
-    png(filename = filename, width=1920, height=1080)
-    plot(c(-1, 1), c(-1, 1), type = "n", asp=1, axes=F, xlab='', ylab='')
-    points(data[q,], pch=16, cex=3)
-    dev.off()
-  }
-  
-  system('ffmpeg -r 24 -f image2 -s 1920x1080 -i ./pic%04d.png -vcodec libx264 -pix_fmt yuv420p ../output.mp4')
+}  
+  setwd(olddir)
   
 }
+  
+  
+  
+  
+  
+ 

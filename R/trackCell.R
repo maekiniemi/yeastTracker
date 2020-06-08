@@ -7,21 +7,21 @@
 #' @return a list object of rois with corrected IDs adjusted to previous time stack, if needed.
 #' @export
 #' @examples
-#' folder<-system.file('data/my.zipfiles', package='yeast')
+#' folder<-system.file('data', package='yeast')
 #' yeastMovie<-trackCell(folder)
 
 #reads in all roi folders and combine them to one object
-trackCell <- function(folder, ...){
+trackCell <- function(folder){
   zipfiles<-dir(folder, full.names = T)
   zipfiles<-zipfiles[which(tools::file_ext(zipfiles) == 'zip')]
   timesSeries<-list()
-  roi <- read.ijzip(zipfiles[1])
-  timesSeries[[1]]<-get.buds(roi, ...)
+  roi <- RImageJROI::read.ijzip(zipfiles[1])
+  timesSeries[[1]]<-get.buds(roi)
   for(i in seq_along(zipfiles)[-1]){
-    roi <- read.ijzip(zipfiles[i])
+    roi <- RImageJROI::read.ijzip(zipfiles[i])
     
 #saves the rois into a list object
-    cellShape.tmp<-get.buds(roi, ...)
+    cellShape.tmp<-get.buds(roi)
     
 #identifies the centroid of each cell
     centroid<-lapply(seq_along(cellShape.tmp), function(x){
