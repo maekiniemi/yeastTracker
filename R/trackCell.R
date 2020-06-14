@@ -21,10 +21,10 @@ trackCell <- function(folder, THRESHOLD = 1){
   for(i in seq_along(zipfiles)[-1]){
     roi <- RImageJROI::read.ijzip(zipfiles[i])
     
-#saves the rois into a list object
+    #saves the rois into a list object
     cellShape.tmp<-get.buds(roi, THRESHOLD = THRESHOLD)
     
-#identifies the centroid of each cell. Why don't we calculate centroid on [[1]]?
+    #identifies the centroid of each cell. Why don't we calculate centroid on [[1]]?
     centroid<-lapply(seq_along(cellShape.tmp), function(x){
       if(length(cellShape.tmp[[x]])>1){
         apply(cellShape.tmp[[x]][,1:2], 2, mean)
@@ -33,21 +33,21 @@ trackCell <- function(folder, THRESHOLD = 1){
       }
     })
     
- #checks if the cell centroid with a specific ID is within the polygon of the previous time stack, then they will be assigned 1. If not they are assigned 0.
+    #checks if the cell centroid with a specific ID is within the polygon of the previous time stack, then they will be assigned 1. If not they are assigned 0.
     position.correct <- lapply(seq_along(timesSeries[[i-1]]), function(x){
-      if(length(timesSeries[[i-1]][[x]])>1 & length(centroid)>= length(timesSeries[[i-1]]) ){
+      if(!is.na(timesSeries[[i-1]][[x]]) & length(centroid)>= length(timesSeries[[i-1]]) ){
         point.in.polygon(centroid[[x]][1], centroid[[x]][2], timesSeries[[i-1]][[x]]$X,  timesSeries[[i-1]][[x]]$Y)
       }else{
         return(NA)
       }
     })
-
-# takes the cells that were identified as not correct
-# if there are cells that need to change ID it will compute the original centroid of them 
+    
+    # takes the cells that were identified as not correct
+    # if there are cells that need to change ID it will compute the original centroid of them 
     has.to.change<-which(position.correct == 0)
     timesSeries[[i]] <- cellShape.tmp
     if(length(has.to.change)>0){
-  
+      
       centroid.original<-lapply(has.to.change, function(x){
         if(length(timesSeries[[i-1]][[x]])>1){
           apply(timesSeries[[i-1]][[x]][,1:2], 2, mean)
@@ -55,27 +55,27 @@ trackCell <- function(folder, THRESHOLD = 1){
           return(NA)
         }
       })
-
-# Checks if the original centroid of the cells is found withing the cells of the previous time stack            
+      
+      # Checks if the original centroid of the cells is found withing the cells of the previous time stack            
       order.change<-integer()
       for(k in seq_along(centroid.original)){
-      match.cell <- lapply(seq_along(cellShape.tmp), function(x){
-        if(length(cellShape.tmp[[x]])>1){
-          point.in.polygon(centroid.original[[k]][1], centroid.original[[k]][2], cellShape.tmp[[x]]$X,  cellShape.tmp[[x]]$Y)
-        }else{
-          return(NA)
-        }
-      })
-
-      
-# Changes the ID of cells that have the wrong ID   
-      order.change <- c(order.change, which(unlist(match.cell) == 1)[1] )
+        match.cell <- lapply(seq_along(cellShape.tmp), function(x){
+          if(length(cellShape.tmp[[x]])>1){
+            point.in.polygon(centroid.original[[k]][1], centroid.original[[k]][2], cellShape.tmp[[x]]$X,  cellShape.tmp[[x]]$Y)
+          }else{
+            return(NA)
+          }
+        })
+        
+        
+        # Changes the ID of cells that have the wrong ID   
+        order.change <- c(order.change, which(unlist(match.cell) == 1)[1] )
       }
-    
+      
       for(l in seq_along(order.change))
         timesSeries[[i]][[has.to.change[l]]] <- cellShape.tmp[[order.change[l]]]
     }
   }
- 
+  
   return(timesSeries)
 }
