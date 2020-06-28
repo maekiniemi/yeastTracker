@@ -248,8 +248,7 @@ edist<-function(coord){
 #' roi <- read.ijzip(filename)
 #' yeastCells<-get.buds(roi)
 
-# Problem: 100 threshold is perfect for the first two images but too low for third image. If we increase
-# threshold to fit the third image it will be to large for image 2...
+
 
 get.buds<-function(roi, THRESHOLD = 1, borderCol = rgb(0,0,0,0.2), fillCol = NA, add=FALSE, xlab = "", ylab = "", main = "get buds", asp = 1, ...) {
 

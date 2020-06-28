@@ -25,6 +25,7 @@ makeMovie <- function(timesSeries, cll=6){
   dir.create(newfolder)
   setwd(newfolder)
   q<-0
+  
 for (r in seq_along(timesSeries)){
   cat(paste('Rendering:', q, '\r'))
   if(!is.na(timesSeries[[r]][[cll]])){
@@ -35,9 +36,12 @@ for (r in seq_along(timesSeries)){
     y.p <- timesSeries[[r]][[cll]][,2] #5
     filename<-paste0('pic', formatC(q, digits = 3, flag='0'), '.png')
     png(filename = filename, width=1920, height=1080)
-    plot(do.call("rbind", yeastMovie[[r]])[,1:2], pch=16, cex=1, col=do.call("rbind", yeastMovie[[r]])[,6], xlim=c(0,400), main=r, ylim=c(0,450))
+    plot(do.call("rbind", timesSeries[[r]])[,1:2], pch=16, cex=1, col=do.call("rbind", timesSeries[[r]])[,6], xlim=c(0,400), asp=1, main=r, ylim=c(0,450))
     #plot(x.p, y.p, type = "n", asp=1, axes=F, xlab='', ylab='')
     polygon(x.p, y.p, lwd=2, lty=3, col='pink')
+    x<-tapply(do.call("rbind", timesSeries[[r]])[,1], do.call("rbind", timesSeries[[r]])$roi, mean)
+    y<-tapply(do.call("rbind", timesSeries[[r]])[,2], do.call("rbind", timesSeries[[r]])$roi, mean)
+    text(x,y, names(x), col=as.integer(names(x)))
     dev.off()
   }
 }  
@@ -45,10 +49,4 @@ for (r in seq_along(timesSeries)){
   
 }
 
-system('ffmpeg -r 24 -f image2 -s 1920x1080 -i ./mymovie/pic%04d.png -vcodec libx264 -pix_fmt yuv420p ./output6.mp4')    
-
-  
-  
-  
-  
- 
+#system('ffmpeg -r 24 -f image2 -s 1920x1080 -i ./mymovie/pic%04d.png -vcodec libx264 -pix_fmt yuv420p ./RNAmovie.mp4')    

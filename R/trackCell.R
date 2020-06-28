@@ -9,13 +9,14 @@
 #' @export
 #' @examples
 #' folder<-system.file('data', package='yeast')
-#' yeastMovie<-trackCell(folder)
+#' yeastMovie<-trackCell2(folder)
 
 #reads in all roi folders and combine them to one object
 trackCell <- function(folder, THRESHOLD = 1){
   zipfiles<-dir(folder, full.names = T)
   zipfiles<-zipfiles[which(tools::file_ext(zipfiles) == 'zip')]
   timesSeries<-list()
+  
   roi <- RImageJROI::read.ijzip(zipfiles[1])
   timesSeries[[1]]<-get.buds(roi, THRESHOLD = THRESHOLD)
   for(i in seq_along(zipfiles)[-1]){
@@ -24,7 +25,7 @@ trackCell <- function(folder, THRESHOLD = 1){
     #saves the rois into a list object
     cellShape.tmp<-get.buds(roi, THRESHOLD = THRESHOLD)
     
-    #identifies the centroid of each cell. Why don't we calculate centroid on [[1]]?
+    #identifies the centroid of each cell.
     centroid<-lapply(seq_along(cellShape.tmp), function(x){
       if(length(cellShape.tmp[[x]])>1){
         apply(cellShape.tmp[[x]][,1:2], 2, mean)
@@ -34,13 +35,22 @@ trackCell <- function(folder, THRESHOLD = 1){
     })
     
     #checks if the cell centroid with a specific ID is within the polygon of the previous time stack, then they will be assigned 1. If not they are assigned 0.
-    position.correct <- lapply(seq_along(timesSeries[[i-1]]), function(x){
-      if(!is.na(timesSeries[[i-1]][[x]]) & length(centroid)>= length(timesSeries[[i-1]]) ){
+    position.correct <- lapply(seq_along(centroid), function(x){
+      if(length(timesSeries[[i-1]]) > x ){
+      if(!all(is.na(timesSeries[[i-1]][[x]])) & !all( is.na(centroid[[x]])) ){
         point.in.polygon(centroid[[x]][1], centroid[[x]][2], timesSeries[[i-1]][[x]]$X,  timesSeries[[i-1]][[x]]$Y)
+      }else{
+        if(all( is.na(centroid[[x]]))){
+          return(NA)
+        }else{
+          return(0)
+        }
+      }
       }else{
         return(NA)
       }
     })
+    
     
     # takes the cells that were identified as not correct
     # if there are cells that need to change ID it will compute the original centroid of them 
@@ -48,7 +58,7 @@ trackCell <- function(folder, THRESHOLD = 1){
     timesSeries[[i]] <- cellShape.tmp
     if(length(has.to.change)>0){
       
-      centroid.original<-lapply(has.to.change, function(x){
+      centroid.original<-lapply(seq_along(timesSeries[[i-1]]), function(x){
         if(length(timesSeries[[i-1]][[x]])>1){
           apply(timesSeries[[i-1]][[x]][,1:2], 2, mean)
         }else{
@@ -57,23 +67,36 @@ trackCell <- function(folder, THRESHOLD = 1){
       })
       
       # Checks if the original centroid of the cells is found withing the cells of the previous time stack            
-      order.change<-integer()
+      order.change<-rep(NA, length(has.to.change) )
       for(k in seq_along(centroid.original)){
-        match.cell <- lapply(seq_along(cellShape.tmp), function(x){
+        match.cell <- lapply(has.to.change, function(x){
           if(length(cellShape.tmp[[x]])>1){
             point.in.polygon(centroid.original[[k]][1], centroid.original[[k]][2], cellShape.tmp[[x]]$X,  cellShape.tmp[[x]]$Y)
           }else{
             return(NA)
           }
         })
+        match<-which(unlist(match.cell) == 1)
+        if(length(match)>1){
+          distanceTocentr<-lapply(centroid[has.to.change[match]], function(x){ sum((x - centroid.original[[k]])^2)  })
+          match<-match[which.min(distanceTocentr)]
+        }
         
-        
-        # Changes the ID of cells that have the wrong ID   
-        order.change <- c(order.change, which(unlist(match.cell) == 1)[1] )
+        # Changes the ID of cells that has the wrong ID   
+        order.change[match] <- k 
       }
       
-      for(l in seq_along(order.change))
-        timesSeries[[i]][[has.to.change[l]]] <- cellShape.tmp[[order.change[l]]]
+      for(l in seq_along(order.change)){
+        cellShape.tmp[[has.to.change[l]]]$roi <- order.change[l]
+        if(!is.na(order.change[l])){
+          timesSeries[[i]][[order.change[l]]] <- cellShape.tmp[[has.to.change[l]]]
+        }
+      }
+      #OBS! if new ones doesnt exist in the previous then delete
+      timesSeries[[i]][which(is.na(timesSeries[[i-1]]))]<-NA
+      
+      
+      
     }
   }
   
