@@ -12,8 +12,12 @@
 #' folder<-system.file('data/res', package='yeast')
 #' yeastMovie<-trackCell(folder, delstack=T)
 
+#trackCell modified
+#without removing cells
+
+
 #reads in all roi folders and combine them to one object
-trackCell <- function(folder, THRESHOLD = 1, delstack = T){
+trackCellmod <- function(folder, THRESHOLD = 1, delstack = T){
   zipfiles<-dir(folder, full.names = T)
   zipfiles<-zipfiles[which(tools::file_ext(zipfiles) == 'zip')]
   timesSeries<-list()
@@ -38,15 +42,15 @@ trackCell <- function(folder, THRESHOLD = 1, delstack = T){
     #checks if the cell centroid with a specific ID is within the polygon of the previous time stack, then they will be assigned 1. If not they are assigned 0.
     position.correct <- lapply(seq_along(centroid), function(x){
       if(length(timesSeries[[i-1]]) > x ){
-      if(!all(is.na(timesSeries[[i-1]][[x]])) & !all( is.na(centroid[[x]])) ){
-        point.in.polygon(centroid[[x]][1], centroid[[x]][2], timesSeries[[i-1]][[x]]$X,  timesSeries[[i-1]][[x]]$Y)
-      }else{
-        if(all( is.na(centroid[[x]]))){
-          return(NA)
+        if(!all(is.na(timesSeries[[i-1]][[x]])) & !all( is.na(centroid[[x]])) ){
+          point.in.polygon(centroid[[x]][1], centroid[[x]][2], timesSeries[[i-1]][[x]]$X,  timesSeries[[i-1]][[x]]$Y)
         }else{
-          return(0)
+          if(all( is.na(centroid[[x]]))){
+            return(NA)
+          }else{
+            return(0)
+          }
         }
-      }
       }else{
         return(NA)
       }
@@ -93,13 +97,7 @@ trackCell <- function(folder, THRESHOLD = 1, delstack = T){
           timesSeries[[i]][[order.change[l]]] <- cellShape.tmp[[has.to.change[l]]]
         }
       }
-      #OBS! if new ones doesnt exist in the previous then delete
-      if(delstack == T){
-        timesSeries[[i]][which(is.na(timesSeries[[i-1]]))]<-NA
-      }
-      
-      
-      
+     
     }
   }
   

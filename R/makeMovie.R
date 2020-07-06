@@ -7,7 +7,7 @@
 #' @return a list object of rois with corrected IDs adjusted to previous time stack, if needed.
 #' @export
 #' @examples
-#' folder<-system.file('data/results', package='yeast')
+#' folder<-system.file('data/res', package='yeast')
 #' yeastMovie<-trackCell(folder, THRESHOLD = 1)
 #' makeMovie(yeastMovie, cll = 6)
 
@@ -49,4 +49,4 @@ for (r in seq_along(timesSeries)){
   
 }
 
-#system('ffmpeg -r 24 -f image2 -s 1920x1080 -i ./mymovie/pic%04d.png -vcodec libx264 -pix_fmt yuv420p ./RNAmovie.mp4')    
+system('ffmpeg -r 24 -f image2 -s 1920x1080 -i ./mymovie/pic%04d.png -vcodec libx264 -pix_fmt yuv420p ./RNAmovie.mp4')    
